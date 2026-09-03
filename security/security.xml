@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_ai_user" model="res.groups">
+        <field name="name">AI User</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_ai_admin" model="res.groups">
+        <field name="name">AI Administrator</field>
+        <field name="implied_ids" eval="[(4, ref('group_ai_user'))]"/>
+    </record>
+
+    <!-- Automatically grant AI Administrator access to System Administrators -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_ai_admin'))]"/>
+    </record>
+
+    <!-- Rule: Users can view their own AI logs, Admins can view all -->
+    <record id="ai_request_log_user_rule" model="ir.rule">
+        <field name="name">AI Request Log: User Read Own</field>
+        <field name="model_id" ref="model_ai_request_log"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_ai_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="ai_request_log_admin_rule" model="ir.rule">
+        <field name="name">AI Request Log: Admin Full Access</field>
+        <field name="model_id" ref="model_ai_request_log"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_ai_admin'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+</odoo>

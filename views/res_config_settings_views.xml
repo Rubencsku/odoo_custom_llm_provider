@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend the actual AI app settings view, not the unrelated base view. -->
+    <record id="res_config_settings_view_form_ai_custom" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.ai.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="30"/>
+        <field name="inherit_id" ref="ai_app.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='ai_app']/block[@name='ai_providers']/setting[1]" position="before">
+                <setting id="custom_ai_provider"
+                         string="Use a custom AI provider"
+                         help="Replace Odoo's native OpenAI and Google routing with your own provider."
+                         groups="base.group_system">
+                    <field name="use_custom_ai_provider"/>
+                    <div class="content-group" invisible="not use_custom_ai_provider">
+                        <div class="row mt16">
+                            <label for="ai_active_provider_id" class="col-lg-3 o_light_label"/>
+                            <field name="ai_active_provider_id"
+                                   class="oe_inline"
+                                   options="{'no_quick_create': True}"/>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <label for="ai_active_provider_type" class="col-lg-3 o_light_label"/>
+                            <field name="ai_active_provider_type" class="oe_inline"/>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <label for="ai_active_provider_base_url" class="col-lg-3 o_light_label"/>
+                            <field name="ai_active_provider_base_url" class="oe_inline w-50"/>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <label for="ai_active_provider_api_key" class="col-lg-3 o_light_label"/>
+                            <field name="ai_active_provider_api_key" password="True" class="oe_inline w-50"/>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <label for="ai_default_model_id" class="col-lg-3 o_light_label"/>
+                            <field name="ai_default_model_id"
+                                   class="oe_inline"
+                                   options="{'no_create': True}"
+                                   domain="[('provider_id', '=', ai_active_provider_id), ('active', '=', True), ('capability_chat', '=', True)]"/>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <label for="ai_active_provider_embedding_model" class="col-lg-3 o_light_label"/>
+                            <field name="ai_active_provider_embedding_model" class="oe_inline"/>
+                        </div>
+                        <div class="row mt16" invisible="not ai_active_provider_id">
+                            <div class="col-lg-12">
+                                <button name="action_settings_test_provider" type="object" string="Test Connection" class="btn btn-primary me-2" icon="fa-plug"/>
+                                <button name="action_settings_sync_models" type="object" string="Discover Models" class="btn btn-secondary me-2" icon="fa-refresh"/>
+                                <button name="%(action_ai_provider)d" type="action" string="Manage Providers" class="btn btn-link" icon="fa-external-link"/>
+                            </div>
+                        </div>
+                        <div class="row mt8" invisible="not ai_active_provider_id">
+                            <div class="col-lg-12 text-muted">
+                                <span class="me-3">
+                                    Status:
+                                    <field name="ai_active_provider_status"
+                                           widget="badge"
+                                           decoration-success="ai_active_provider_status == 'connected'"
+                                           decoration-danger="ai_active_provider_status == 'error'"/>
+                                </span>
+                                <span>
+                                    Last model sync: <field name="ai_active_provider_last_sync"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+
+            <xpath expr="//setting[@id='openai_provider']" position="attributes">
+                <attribute name="invisible">use_custom_ai_provider</attribute>
+            </xpath>
+            <xpath expr="//setting[@id='google_provider']" position="attributes">
+                <attribute name="invisible">use_custom_ai_provider</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

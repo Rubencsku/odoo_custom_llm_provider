@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Custom Providers & Models Catalog inside native AI App -> Configuration -->
+    <menuitem id="menu_ai_provider"
+              name="Custom Providers"
+              parent="ai_app.ai_config_menu"
+              action="action_ai_provider"
+              sequence="30"
+              active="False"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_ai_model"
+              name="Models Catalog"
+              parent="ai_app.ai_config_menu"
+              action="action_ai_model"
+              sequence="35"
+              active="False"
+              groups="base.group_system"/>
+
+    <!-- Observability & Token Audit Logs inside native AI App root -->
+    <menuitem id="menu_ai_analytics"
+              name="Observability"
+              parent="ai_app.ai_menu_root"
+              sequence="48"
+              active="False"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_ai_request_log"
+              name="Audit &amp; Token Logs"
+              parent="menu_ai_analytics"
+              action="action_ai_request_log"
+              active="False"
+              sequence="10"/>
+</odoo>

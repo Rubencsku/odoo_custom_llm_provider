@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- AI Provider List View -->
+    <record id="view_ai_provider_tree" model="ir.ui.view">
+        <field name="name">ai.provider.list</field>
+        <field name="model">ai.provider</field>
+        <field name="arch" type="xml">
+            <list string="AI Providers" decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="provider_type" widget="badge"/>
+                <field name="base_url"/>
+                <field name="status" widget="badge" decoration-success="status == 'connected'" decoration-danger="status == 'error'" decoration-info="status == 'draft'"/>
+                <field name="model_count"/>
+                <field name="last_sync_date"/>
+                <field name="is_default" widget="boolean_toggle"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- AI Provider Form View -->
+    <record id="view_ai_provider_form" model="ir.ui.view">
+        <field name="name">ai.provider.form</field>
+        <field name="model">ai.provider</field>
+        <field name="arch" type="xml">
+            <form string="AI Provider">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight" icon="fa-plug"/>
+                    <button name="action_fetch_models" string="Discover &amp; Sync Models" type="object" class="btn-secondary" icon="fa-refresh"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,connected,error"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_models" type="object" class="oe_stat_button" icon="fa-cubes">
+                            <field name="model_count" string="Models" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-history">
+                            <field name="log_count" string="Audit Logs" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. OpenAI Cloud, Ollama GPU Server"/></h1>
+                    </div>
+                    <group>
+                        <group string="Connection Setup">
+                            <field name="provider_type"/>
+                            <field name="base_url"/>
+                            <field name="api_key" password="True"/>
+                        </group>
+                        <group string="Settings &amp; Policies">
+                            <field name="timeout"/>
+                            <field name="embedding_model" placeholder="e.g. text-embedding-3-small, nomic-embed-text"/>
+                            <field name="default_model_id" options="{'no_create': True}"/>
+                            <field name="is_default" widget="boolean_toggle"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="last_sync_date" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Models Catalog" name="models_tab">
+                            <field name="model_ids">
+                                <list string="Models" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="model_id"/>
+                                    <field name="capability_chat" widget="boolean_toggle"/>
+                                    <field name="capability_vision" widget="boolean_toggle"/>
+                                    <field name="capability_tools" widget="boolean_toggle"/>
+                                    <field name="temperature"/>
+                                    <field name="max_tokens"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Diagnostics &amp; Status" name="diagnostics_tab">
+                            <group>
+                                <field name="status_message" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Advanced (Custom Headers)" name="advanced_tab">
+                            <group string="HTTP Headers (JSON format)">
+                                <field name="custom_headers" nolabel="1" placeholder='{"HTTP-Referer": "https://myodoo.com", "X-Title": "My ERP"}'/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- AI Provider Search View -->
+    <record id="view_ai_provider_search" model="ir.ui.view">
+        <field name="name">ai.provider.search</field>
+        <field name="model">ai.provider</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="provider_type"/>
+                <filter string="Connected" name="connected_only" domain="[('status', '=', 'connected')]"/>
+                <filter string="With Errors" name="error_only" domain="[('status', '=', 'error')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Provider Type" name="group_provider_type" context="{'group_by': 'provider_type'}"/>
+                <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- AI Provider Action Window -->
+    <record id="action_ai_provider" model="ir.actions.act_window">
+        <field name="name">AI Providers</field>
+        <field name="res_model">ai.provider</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ai_provider_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure your first AI Provider!
+            </p>
+            <p>
+                Add OpenAI, Anthropic Claude, Google Gemini, Groq, OpenRouter, or a private local Ollama instance.
+            </p>
+        </field>
+    </record>
+</odoo>

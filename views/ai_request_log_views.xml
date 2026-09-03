@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Request Log List View -->
+    <record id="view_ai_request_log_tree" model="ir.ui.view">
+        <field name="name">ai.request.log.list</field>
+        <field name="model">ai.request.log</field>
+        <field name="arch" type="xml">
+            <list string="AI Request Logs" create="false" edit="false" decoration-danger="status == 'error'" decoration-warning="status == 'fallback_used'">
+                <field name="create_date" string="Timestamp"/>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="provider_id"/>
+                <field name="model_id"/>
+                <field name="use_case" widget="badge"/>
+                <field name="status" widget="badge" decoration-success="status == 'success'" decoration-warning="status == 'fallback_used'" decoration-danger="status == 'error'"/>
+                <field name="total_tokens"/>
+                <field name="latency_ms" string="Latency (ms)"/>
+                <field name="cost_estimated" string="Est. Cost ($)"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Request Log Form View -->
+    <record id="view_ai_request_log_form" model="ir.ui.view">
+        <field name="name">ai.request.log.form</field>
+        <field name="model">ai.request.log</field>
+        <field name="arch" type="xml">
+            <form string="AI Request Audit Log" create="false" edit="false">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="success,fallback_used,error"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                        <h3><field name="create_date" readonly="1"/></h3>
+                    </div>
+                    <group>
+                        <group string="Origin &amp; Routing">
+                            <field name="user_id"/>
+                            <field name="provider_id"/>
+                            <field name="model_id"/>
+                            <field name="use_case"/>
+                        </group>
+                        <group string="Metrics &amp; Cost">
+                            <field name="prompt_tokens"/>
+                            <field name="completion_tokens"/>
+                            <field name="total_tokens"/>
+                            <field name="latency_ms"/>
+                            <field name="cost_estimated"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Prompt Snippet" name="prompt_tab">
+                            <field name="prompt_snippet" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Response Snippet" name="response_tab">
+                            <field name="response_snippet" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Error Diagnostic" name="error_tab" invisible="status != 'error'">
+                            <field name="error_message" nolabel="1" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Request Log Pivot View -->
+    <record id="view_ai_request_log_pivot" model="ir.ui.view">
+        <field name="name">ai.request.log.pivot</field>
+        <field name="model">ai.request.log</field>
+        <field name="arch" type="xml">
+            <pivot string="AI Usage Analysis">
+                <field name="model_id" type="row"/>
+                <field name="use_case" type="col"/>
+                <field name="total_tokens" type="measure"/>
+                <field name="cost_estimated" type="measure"/>
+                <field name="latency_ms" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Request Log Graph View -->
+    <record id="view_ai_request_log_graph" model="ir.ui.view">
+        <field name="name">ai.request.log.graph</field>
+        <field name="model">ai.request.log</field>
+        <field name="arch" type="xml">
+            <graph string="Token Consumption by Model" type="bar">
+                <field name="model_id"/>
+                <field name="total_tokens" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Request Log Search View -->
+    <record id="view_ai_request_log_search" model="ir.ui.view">
+        <field name="name">ai.request.log.search</field>
+        <field name="model">ai.request.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="provider_id"/>
+                <field name="model_id"/>
+                <field name="use_case"/>
+                <filter string="Successful" name="success_only" domain="[('status', '=', 'success')]"/>
+                <filter string="Fallback Triggered" name="fallback_only" domain="[('status', '=', 'fallback_used')]"/>
+                <filter string="Errors" name="error_only" domain="[('status', '=', 'error')]"/>
+                <separator/>
+                <filter string="Model" name="group_model" context="{'group_by': 'model_id'}"/>
+                <filter string="Provider" name="group_provider" context="{'group_by': 'provider_id'}"/>
+                <filter string="Use Case" name="group_use_case" context="{'group_by': 'use_case'}"/>
+                <filter string="User" name="group_user" context="{'group_by': 'user_id'}"/>
+                <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Request Log Action Window -->
+    <record id="action_ai_request_log" model="ir.actions.act_window">
+        <field name="name">Audit &amp; Token Logs</field>
+        <field name="res_model">ai.request.log</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_ai_request_log_search"/>
+    </record>
+</odoo>

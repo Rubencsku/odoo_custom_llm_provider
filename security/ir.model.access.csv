@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ai_provider_user,ai.provider.user,model_ai_provider,group_ai_user,1,0,0,0
+access_ai_provider_admin,ai.provider.admin,model_ai_provider,group_ai_admin,1,1,1,1
+access_ai_model_user,ai.model.user,model_ai_model,group_ai_user,1,0,0,0
+access_ai_model_admin,ai.model.admin,model_ai_model,group_ai_admin,1,1,1,1
+access_ai_request_log_user,ai.request.log.user,model_ai_request_log,group_ai_user,1,1,1,0
+access_ai_request_log_admin,ai.request.log.admin,model_ai_request_log,group_ai_admin,1,1,1,1

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Request Logs -->
+        <record id="seq_ai_request_log" model="ir.sequence">
+            <field name="name">AI Request Log Sequence</field>
+            <field name="code">ai.request.log</field>
+            <field name="prefix">AILOG/%(year)s%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Template Provider: OpenAI -->
+        <record id="provider_openai" model="ai.provider">
+            <field name="name">OpenAI Official</field>
+            <field name="provider_type">openai</field>
+            <field name="base_url">https://api.openai.com/v1</field>
+            <field name="timeout">60</field>
+            <field name="sequence">1</field>
+            <field name="is_default">True</field>
+        </record>
+
+        <!-- Template Provider: Anthropic Claude -->
+        <record id="provider_anthropic" model="ai.provider">
+            <field name="name">Anthropic Claude</field>
+            <field name="provider_type">anthropic</field>
+            <field name="base_url">https://api.anthropic.com/v1</field>
+            <field name="timeout">60</field>
+            <field name="sequence">2</field>
+        </record>
+
+        <!-- Template Provider: Google Gemini -->
+        <record id="provider_gemini" model="ai.provider">
+            <field name="name">Google Gemini</field>
+            <field name="provider_type">gemini</field>
+            <field name="base_url">https://generativelanguage.googleapis.com/v1beta</field>
+            <field name="timeout">60</field>
+            <field name="sequence">3</field>
+        </record>
+
+        <!-- Template Provider: Groq -->
+        <record id="provider_groq" model="ai.provider">
+            <field name="name">Groq Fast Inference</field>
+            <field name="provider_type">groq</field>
+            <field name="base_url">https://api.groq.com/openai/v1</field>
+            <field name="timeout">30</field>
+            <field name="sequence">4</field>
+        </record>
+
+        <!-- Template Provider: OpenRouter -->
+        <record id="provider_openrouter" model="ai.provider">
+            <field name="name">OpenRouter Unified API</field>
+            <field name="provider_type">openrouter</field>
+            <field name="base_url">https://openrouter.ai/api/v1</field>
+            <field name="timeout">60</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <!-- Template Provider: Ollama Local -->
+        <record id="provider_ollama" model="ai.provider">
+            <field name="name">Ollama Local (On-Premise)</field>
+            <field name="provider_type">ollama</field>
+            <field name="base_url">http://localhost:11434</field>
+            <field name="timeout">120</field>
+            <field name="sequence">6</field>
+        </record>
+    </data>
+</odoo>

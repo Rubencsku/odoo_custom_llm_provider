@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- AI Model List View -->
+    <record id="view_ai_model_tree" model="ir.ui.view">
+        <field name="name">ai.model.list</field>
+        <field name="model">ai.model</field>
+        <field name="arch" type="xml">
+            <list string="Models Catalog" decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="provider_id"/>
+                <field name="provider_type" widget="badge"/>
+                <field name="capability_chat" widget="boolean_toggle"/>
+                <field name="capability_vision" widget="boolean_toggle"/>
+                <field name="capability_tools" widget="boolean_toggle"/>
+                <field name="temperature"/>
+                <field name="max_tokens"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- AI Model Form View -->
+    <record id="view_ai_model_form" model="ir.ui.view">
+        <field name="name">ai.model.form</field>
+        <field name="model">ai.model</field>
+        <field name="arch" type="xml">
+            <form string="AI Model">
+                <header>
+                    <button name="action_test_chat" string="Test Prompt" type="object" class="oe_highlight" icon="fa-paper-plane"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Claude 3.7 Sonnet"/></h1>
+                        <h3><field name="model_id" placeholder="Technical ID (e.g. claude-3-7-sonnet-20250219)"/></h3>
+                    </div>
+                    <group>
+                        <group string="Provider Association">
+                            <field name="provider_id" options="{'no_create': True}"/>
+                            <field name="provider_type" readonly="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Default Hyperparameters">
+                            <field name="temperature"/>
+                            <field name="max_tokens"/>
+                            <field name="top_p"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Capabilities" name="capabilities">
+                            <group col="4">
+                                <field name="capability_chat" widget="boolean_toggle"/>
+                                <field name="capability_vision" widget="boolean_toggle"/>
+                                <field name="capability_tools" widget="boolean_toggle"/>
+                                <field name="capability_json" widget="boolean_toggle"/>
+                                <field name="capability_embeddings" widget="boolean_toggle"/>
+                            </group>
+                            <group string="Description / Notes">
+                                <field name="description" nolabel="1" placeholder="Notes on when to use this model..."/>
+                            </group>
+                        </page>
+                        <page string="Pricing &amp; Cost Estimation" name="pricing">
+                            <group>
+                                <group string="Rates per 1 Million Tokens">
+                                    <field name="cost_per_1m_input_tokens"/>
+                                    <field name="cost_per_1m_output_tokens"/>
+                                </group>
+                                <group string="Usage Statistics">
+                                    <field name="total_requests" readonly="1"/>
+                                    <field name="total_tokens_used" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- AI Model Search View -->
+    <record id="view_ai_model_search" model="ir.ui.view">
+        <field name="name">ai.model.search</field>
+        <field name="model">ai.model</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="provider_id"/>
+                <filter string="Chat Models" name="chat_only" domain="[('capability_chat', '=', True)]"/>
+                <filter string="Vision / Multimodal" name="vision_only" domain="[('capability_vision', '=', True)]"/>
+                <filter string="Tool Calling" name="tools_only" domain="[('capability_tools', '=', True)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Provider" name="group_provider" context="{'group_by': 'provider_id'}"/>
+                <filter string="Provider Type" name="group_provider_type" context="{'group_by': 'provider_type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- AI Model Action Window -->
+    <record id="action_ai_model" model="ir.actions.act_window">
+        <field name="name">AI Models</field>
+        <field name="res_model">ai.model</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ai_model_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No AI models found.
+            </p>
+            <p>
+                Synchronize your provider to automatically import available models.
+            </p>
+        </field>
+    </record>
+</odoo>
