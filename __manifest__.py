@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Odoo AI Custom Provider',
-    'version': '19.0.2.0.0',
+    'version': '19.0.2.0.1',
     'category': 'Productivity/Artificial Intelligence',
     'summary': 'Use custom LLM providers from Odoo 19 native AI settings and agents',
     'description': """

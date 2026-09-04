@@ -15,6 +15,7 @@ from services.native_bridge import (
     format_tools,
     parse_tool_calls,
     response_format_for_schema,
+    tool_call_history,
     tool_result_message,
 )
 
@@ -83,6 +84,29 @@ class TestNativeAIIntegration(unittest.TestCase):
             'tool_result',
         )
         self.assertIn('functionResponse', tool_result_message('gemini', 'lookup_partner', 'ok')['parts'][0])
+
+    def test_gemini_tool_history_keeps_native_signed_parts(self):
+        native_history = [{
+            'role': 'model',
+            'parts': [
+                {'thought': True, 'text': 'internal', 'thoughtSignature': 'thought-sig'},
+                {
+                    'functionCall': {'name': 'lookup_partner', 'args': {'id': 7}},
+                    'thoughtSignature': 'call-sig',
+                },
+            ],
+        }]
+        history = tool_call_history(
+            'gemini', '', [{'function': {'name': 'lookup_partner'}}], native_history
+        )
+        self.assertEqual(history, native_history)
+        self.assertEqual(history[0]['parts'][1]['thoughtSignature'], 'call-sig')
+
+        normalized = tool_call_history(
+            'openai', '', [{'function': {'name': 'lookup_partner'}}], native_history
+        )
+        self.assertEqual(normalized[0]['role'], 'assistant')
+        self.assertIn('tool_calls', normalized[0])
 
     def test_json_schema_uses_chat_completions_shape(self):
         schema = {'type': 'object', 'properties': {'answer': {'type': 'string'}}}

@@ -128,6 +128,23 @@ def parse_tool_calls(tool_calls):
     return parsed
 
 
+def tool_call_history(provider_type, content, tool_calls, provider_history=()):
+    """Return the assistant/model history Odoo must replay after tool calls.
+
+    Gemini response parts can contain opaque ``thoughtSignature`` values.  Its
+    stateless REST API requires those parts to be sent back unchanged, so use
+    the provider-native history whenever the adapter supplies it.  Other
+    providers continue to use the normalized common representation.
+    """
+    if provider_type == "gemini" and provider_history:
+        return [dict(item) for item in provider_history]
+    return [{
+        "role": "assistant",
+        "content": content or None,
+        "tool_calls": tool_calls,
+    }]
+
+
 def tool_result_message(provider_type, tool_call_id, return_value):
     value = str(return_value)
     if provider_type == "anthropic":

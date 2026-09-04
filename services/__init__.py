@@ -21,6 +21,7 @@ from .native_bridge import (
     format_tools,
     parse_tool_calls,
     response_format_for_schema,
+    tool_call_history,
     tool_result_message,
 )
 
@@ -83,6 +84,7 @@ __all__ = [
     "format_tools",
     "parse_tool_calls",
     "response_format_for_schema",
+    "tool_call_history",
     "tool_result_message",
     "get_adapter",
 ]

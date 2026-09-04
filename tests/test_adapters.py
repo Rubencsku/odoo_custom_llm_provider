@@ -236,9 +236,17 @@ class TestAIAdapters(unittest.TestCase):
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
             "candidates": [{
-                "content": {"parts": [{
-                    "functionCall": {"name": "lookup_partner", "args": {"id": 7}},
-                }]},
+                "content": {"role": "model", "parts": [
+                    {
+                        "thought": True,
+                        "text": "I should look up the partner.",
+                        "thoughtSignature": "encrypted-thought-signature",
+                    },
+                    {
+                        "functionCall": {"name": "lookup_partner", "args": {"id": 7}},
+                        "thoughtSignature": "encrypted-function-signature",
+                    },
+                ]},
                 "finishReason": "STOP",
             }],
             "usageMetadata": {},
@@ -260,7 +268,98 @@ class TestAIAdapters(unittest.TestCase):
         )
 
         self.assertEqual(result.tool_calls[0]["function"]["name"], "lookup_partner")
+        self.assertEqual(
+            result.tool_calls[0]["thought_signature"],
+            "encrypted-function-signature",
+        )
+        self.assertEqual(
+            result.provider_history[0]["parts"][1]["thoughtSignature"],
+            "encrypted-function-signature",
+        )
+        self.assertEqual(result.content, "")
         self.assertIn("functionDeclarations", mock_post.call_args.kwargs["json"]["tools"])
+
+    @patch('requests.post')
+    def test_gemini_replays_signed_tool_history_verbatim(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "candidates": [{
+                "content": {"parts": [{"text": "Partner found."}]},
+                "finishReason": "STOP",
+            }],
+            "usageMetadata": {},
+        }
+        mock_post.return_value = mock_resp
+
+        signed_model_content = {
+            "role": "model",
+            "parts": [
+                {
+                    "functionCall": {"name": "lookup_partner", "args": {"id": 7}},
+                    "thoughtSignature": "opaque-signature",
+                },
+                {
+                    "functionCall": {"name": "lookup_company", "args": {"id": 2}},
+                    "thoughtSignature": "parallel-signature",
+                },
+            ],
+        }
+        tool_results = {
+            "role": "user",
+            "parts": [{
+                "functionResponse": {
+                    "name": "lookup_partner",
+                    "response": {"result": "Ruben"},
+                },
+            }],
+        }
+
+        adapter = GeminiAdapter(
+            "https://generativelanguage.googleapis.com/v1beta", api_key="key"
+        )
+        adapter.chat_completion(
+            model_id="gemini-3.8-flash",
+            messages=[signed_model_content, tool_results],
+        )
+
+        contents = mock_post.call_args.kwargs["json"]["contents"]
+        self.assertEqual(contents[0], signed_model_content)
+        self.assertEqual(contents[1], tool_results)
+
+    @patch('requests.post')
+    def test_gemini_rebuilds_normalized_tool_call_with_signature(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "candidates": [{
+                "content": {"parts": [{"text": "Done."}]},
+                "finishReason": "STOP",
+            }],
+            "usageMetadata": {},
+        }
+        mock_post.return_value = mock_resp
+
+        adapter = GeminiAdapter(
+            "https://generativelanguage.googleapis.com/v1beta", api_key="key"
+        )
+        adapter.chat_completion(
+            model_id="gemini-3.8-flash",
+            messages=[{
+                "role": "assistant",
+                "tool_calls": [{
+                    "type": "function",
+                    "thought_signature": "fallback-signature",
+                    "function": {
+                        "name": "lookup_partner",
+                        "arguments": '{"id": 7}',
+                    },
+                }],
+            }],
+        )
+
+        part = mock_post.call_args.kwargs["json"]["contents"][0]["parts"][0]
+        self.assertEqual(part["thoughtSignature"], "fallback-signature")
 
     @patch('requests.post')
     def test_gemini_embeddings_are_normalized_for_odoo(self, mock_post):

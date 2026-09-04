@@ -19,6 +19,7 @@ from ..services import (
     format_tools,
     parse_tool_calls,
     response_format_for_schema,
+    tool_call_history,
     tool_result_message,
 )
 
@@ -246,11 +247,12 @@ def _patch_llm_api_service():
         next_actions = parse_tool_calls(response.tool_calls)
         next_inputs = list(inputs or ())
         if next_actions:
-            next_inputs.append({
-                'role': 'assistant',
-                'content': response.content or None,
-                'tool_calls': response.tool_calls,
-            })
+            next_inputs.extend(tool_call_history(
+                self.custom_provider.provider_type,
+                response.content,
+                response.tool_calls,
+                response.provider_history,
+            ))
         _log_request(self, model, response=response, messages=messages)
         return ([response.content] if response.content else []), next_actions, next_inputs
 

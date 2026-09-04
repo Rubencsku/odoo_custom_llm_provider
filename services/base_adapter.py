@@ -53,6 +53,11 @@ class AIResponse:
     latency_ms: float = 0.0
     finish_reason: Optional[str] = None
     raw: Dict[str, Any] = field(default_factory=dict)
+    # Provider-native messages that must be replayed verbatim before tool
+    # results. Gemini thinking models attach opaque thought signatures to
+    # response parts, so reducing those parts to the common tool-call shape
+    # would make the next request invalid.
+    provider_history: List[Dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
